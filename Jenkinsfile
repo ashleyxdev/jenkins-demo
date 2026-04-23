@@ -5,7 +5,6 @@ pipeline {
         IMAGE_NAME = 'content-manager'
         CONTAINER_NAME = 'content-manager-app'
         APP_PORT = '5000'
-        DATA_DIR = '/tmp/test-data'
     }
 
     stages {
@@ -17,19 +16,17 @@ pipeline {
             }
         }
 
-        stage('Install') {
+        stage('Install & Test') {
             steps {
-                echo '📦 Installing dependencies...'
-                sh 'node --version'
-                sh 'npm --version'
-                sh 'npm install'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo '🧪 Running tests...'
-                sh 'DATA_DIR=$DATA_DIR npm test'
+                echo '📦 Installing dependencies and running tests...'
+                sh '''
+                    docker run --rm \
+                        -v ${WORKSPACE}:/app \
+                        -w /app \
+                        -e DATA_DIR=/tmp/test-data \
+                        node:18-alpine \
+                        sh -c "npm install && npm test"
+                '''
             }
         }
 
@@ -79,8 +76,7 @@ pipeline {
             '''
         }
         always {
-            echo '🧹 Cleaning up test data...'
-            sh 'rm -rf $DATA_DIR'
+            echo '🧹 Cleaning up...'
         }
     }
 }
