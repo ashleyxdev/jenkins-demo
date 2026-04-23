@@ -4,7 +4,7 @@ const path    = require('path');
 const crypto = require('crypto');
 
 const app      = express();
-const DATA_DIR  = '/data';
+const DATA_DIR  = process.env.DATA_DIR || '/data';
 const DATA_FILE = path.join(DATA_DIR, 'posts.json');
 
 // Middleware
@@ -50,6 +50,10 @@ app.get('/delete/:id', (req, res) => {
     res.redirect('/');
 });
 
-app.listen(5000, '0.0.0.0', () => {
-    console.log('Content Manager running on http://0.0.0.0:5000');
-});
+if (require.main === module) {
+    app.listen(5000, '0.0.0.0', () => {
+        console.log('Content Manager running on http://0.0.0.0:5000');
+    });
+}
+
+module.exports = app;
